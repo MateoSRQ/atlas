@@ -11,10 +11,11 @@ import {
   ProFormDependency,
   ProFormDigit,
 } from '@ant-design/pro-components';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import style from './component.module.css'
 import { ConfigProvider } from 'antd';
 import esES from 'antd/locale/es_ES'
+import axios from 'axios'
 
 type DataSourceType = {
   id: React.Key;
@@ -24,43 +25,8 @@ type DataSourceType = {
   aforo?: number;
 };
 
-const defaultData: DataSourceType[] = [
-  {
-    id: 624748504,
-    sede: 'Sede 1',
-    espacio: 'Aula 101',
-    norma: 'Norma 1',
-    aforo: 0
-  },
-  {
-    id: 624691229,
-    sede: 'Sede 1',
-    espacio: 'Aula 102',
-    norma: 'Norma 1',
-    aforo: 0  
-  },
-  {
-    id: 624748503,
-    sede: 'Sede 2',
-    espacio: 'Aula 101',
-    norma: 'Norma 2',
-    aforo: 0
-  },
-  {
-    id: 6247485034,
-    sede: 'Sede 2',
-    espacio: 'Aula 102',
-    norma: 'Norma 1',
-    aforo: 0
-  },
-  {
-    id: 348503,
-  sede: 'Sede 2',
-  espacio: 'Aula 103',
-  norma: 'Norma 3',
-  aforo: 0
-  }
-];
+
+
 
 export default () => {
   const [editableKeys, setEditableRowKeys] = useState<React.Key[]>(() => []);
@@ -93,6 +59,29 @@ export default () => {
     }
 
   ];
+  const [data, setData] = useState<DataSourceType[]>([])
+
+  useEffect(() => {
+    // declare the data fetching function
+    console.log('useEffect')
+    let _tempData: DataSourceType[] = []
+    const fetchData = async () => {
+      const d = await axios.get('http://127.0.0.1:5984/test/_all_docs?include_docs=true', {
+        auth: {
+            username: 'admin',
+            password: 'admin'
+        }
+      })
+      for (const document of d.data.rows) {
+        _tempData.push(document.doc)
+      }
+      setData(_tempData)
+    }
+  
+    // call the function
+    fetchData()
+      .catch(console.error);
+  }, [])
 
 
   return (
@@ -110,7 +99,7 @@ export default () => {
         }>
           formRef={formRef}
           initialValues={{
-            table: defaultData,
+            table: data,
           }}
         >
 
